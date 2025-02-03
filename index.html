@@ -19,14 +19,33 @@
       padding: 0.5em 1em;
       cursor: pointer;
     }
+    /* Fullscreen overlay for enabling audio */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      z-index: 1000;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div id="overlay">Tap anywhere to enable audio</div>
   <h1>Enjoy a Random Joke!</h1>
   <div id="joke">Loading...</div>
   <button id="newJoke">Another Joke</button>
 
   <script>
+    let audioEnabled = false;
+
     // Function to fetch a random joke from icanhazdadjoke
     async function fetchJoke() {
       try {
@@ -43,13 +62,13 @@
 
     // Function to speak the joke using the Web Speech API
     function speakJoke(jokeText) {
-      if ('speechSynthesis' in window) {
+      if ('speechSynthesis' in window && audioEnabled) {
         const utterance = new SpeechSynthesisUtterance(jokeText);
         // Optionally customize voice, rate, or pitch here:
         // utterance.rate = 1.0; utterance.pitch = 1.0;
         window.speechSynthesis.speak(utterance);
       } else {
-        console.warn('Speech Synthesis not supported in this browser.');
+        console.warn('Speech Synthesis not supported or audio not enabled.');
       }
     }
 
@@ -62,7 +81,15 @@
 
     // Set up event listeners
     document.getElementById('newJoke').addEventListener('click', updateJoke);
-    window.addEventListener('load', updateJoke);
+
+    // Overlay to capture the first user interaction
+    document.getElementById('overlay').addEventListener('click', () => {
+      audioEnabled = true;
+      // Hide the overlay after enabling audio
+      document.getElementById('overlay').style.display = 'none';
+      // Now that audio is enabled, fetch and speak the joke
+      updateJoke();
+    });
   </script>
 </body>
 </html>
